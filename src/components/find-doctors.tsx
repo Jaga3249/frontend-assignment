@@ -84,12 +84,12 @@ const FindYourDoctor = ({ setStep, serachResult, setSearchResult }: Props) => {
               ))}
             </select>
           </div>
-          <div
+          {/* <div
             className="w-10 h-10 flex items-center justify-center border border-gray-200
            rounded-md bg-white shadow-sm cursor-pointer"
           >
             <Send size={16} className="text-gray-700" />
-          </div>
+          </div> */}
         </div>
         <select
           value={selectedSpecialization}
