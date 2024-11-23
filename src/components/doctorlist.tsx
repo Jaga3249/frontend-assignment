@@ -8,6 +8,7 @@ interface Props {
   searchResult: Doctor[];
   setSearchResult: Dispatch<SetStateAction<Doctor[]>>;
   copysearchResult: Doctor[];
+  setcopysearchResult: Dispatch<SetStateAction<Doctor[]>>;
 }
 
 const DoctorList = ({
@@ -15,6 +16,7 @@ const DoctorList = ({
   searchResult,
   setSearchResult,
   copysearchResult,
+  setcopysearchResult,
 }: Props) => {
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -38,7 +40,15 @@ const DoctorList = ({
       }
       return item;
     });
-
+    const copyupdatedData = searchResult.map((item) => {
+      if (item.id === doctor.id) {
+        const updatedDoctor = { ...item, booked: true };
+        setSelectedDoctor(updatedDoctor);
+        return updatedDoctor;
+      }
+      return item;
+    });
+    setcopysearchResult(copyupdatedData);
     setSearchResult(updatedData);
     setIsModalOpen(true);
   };
@@ -88,7 +98,7 @@ const DoctorList = ({
       return hours * 60 + minutes;
     };
 
-    const timeValue = convertToMinutes(time);
+    const timeValue = convertToMinutes(time); //time=10:00 AM
     const startValue = convertToMinutes(start);
     const endValue = convertToMinutes(end);
 

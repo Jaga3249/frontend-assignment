@@ -24,6 +24,7 @@ const App = () => {
           searchResult={serachResult}
           setSearchResult={setSearchResult}
           copysearchResult={copysearchResult}
+          setcopysearchResult={setcopysearchResult}
         />
       )}
     </div>
