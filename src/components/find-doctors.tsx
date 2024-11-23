@@ -47,7 +47,9 @@ const FindYourDoctor = ({
 
   const handleSearch = () => {
     if (!selectedLocation || !selectedSpecialization) {
-      toast.error("Please select a location and specialization.");
+      toast.error(
+        "Please select your preferred location and area of specialization"
+      );
       return;
     }
 
