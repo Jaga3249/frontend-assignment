@@ -5,11 +5,17 @@ import toast from "react-hot-toast";
 
 interface Props {
   setStep: Dispatch<SetStateAction<number>>;
-  serachResult: Doctor[];
+  searchResult: Doctor[];
   setSearchResult: Dispatch<SetStateAction<Doctor[]>>;
+  copysearchResult: Doctor[];
 }
 
-const DoctorList = ({ setStep, serachResult, setSearchResult }: Props) => {
+const DoctorList = ({
+  setStep,
+  searchResult,
+  setSearchResult,
+  copysearchResult,
+}: Props) => {
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
@@ -24,7 +30,7 @@ const DoctorList = ({ setStep, serachResult, setSearchResult }: Props) => {
       return;
     }
 
-    const updatedData = serachResult.map((item) => {
+    const updatedData = searchResult.map((item) => {
       if (item.id === doctor.id) {
         const updatedDoctor = { ...item, booked: true };
         setSelectedDoctor(updatedDoctor);
@@ -39,7 +45,12 @@ const DoctorList = ({ setStep, serachResult, setSearchResult }: Props) => {
 
   // Filter Results based on Distance and Availability
   const applyFilters = () => {
-    let filteredResults = [...serachResult];
+    if (!filterAvailability && !filterDistance) {
+      toast.error("Please select a filter");
+      return;
+    }
+
+    let filteredResults;
 
     // Filter by availability
     if (filterAvailability) {
@@ -49,18 +60,19 @@ const DoctorList = ({ setStep, serachResult, setSearchResult }: Props) => {
         Evening: ["06:00 PM", "11:59 PM"],
       };
       const [start, end] = timeRanges[filterAvailability];
-      filteredResults = filteredResults.filter((item) =>
+      filteredResults = copysearchResult.filter((item) =>
         item.availableTimeSlots.some((slot) => isTimeInRange(slot, start, end))
       );
     }
     // Filter by distance
     if (filterDistance) {
       const maxDistance = parseInt(filterDistance, 10);
-      filteredResults = filteredResults.filter(
+      filteredResults = copysearchResult.filter(
         (item) => item.distance <= maxDistance
       );
     }
-    setSearchResult(filteredResults);
+
+    setSearchResult(filteredResults || []);
     setIsFilterOpen(false);
   };
 
@@ -96,10 +108,10 @@ const DoctorList = ({ setStep, serachResult, setSearchResult }: Props) => {
         <div className="flex justify-between items-center mt-4">
           <div>
             <h2 className="text-2xl font-semibold">
-              Doctors in {serachResult[0]?.location?.city || "your location"}
+              Doctors in {searchResult[0]?.location?.city || "your location"}
             </h2>
             <p className="text-gray-500 mt-2">
-              {serachResult.length} doctors found
+              {searchResult.length} doctors found
             </p>
           </div>
           <button
@@ -112,53 +124,65 @@ const DoctorList = ({ setStep, serachResult, setSearchResult }: Props) => {
         </div>
 
         <div className="mt-6 space-y-6">
-          {serachResult.map((doctor) => (
-            <div
-              key={doctor.id}
-              className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center"
-            >
-              <div className="flex flex-col space-y-1">
-                <h3 className="text-xl font-semibold">{doctor.name}</h3>
-                <p className="text-gray-500">{doctor.specialty}</p>
-                <p className="text-gray-500">{doctor.location.address}</p>
-                <p className="text-gray-500">
-                  Current queue: {doctor.currentQueue} patients
-                </p>
-                <p className="text-gray-500">
-                  Estimated wait: {doctor.estimatedWaitTime}
-                </p>
-              </div>
+          {searchResult.length > 0 ? (
+            searchResult.map((doctor) => (
+              <div
+                key={doctor.id}
+                className="bg-white p-4 rounded-lg shadow-md flex justify-between items-center"
+              >
+                <div className="flex flex-col space-y-1">
+                  <h3 className="text-xl font-semibold">{doctor.name}</h3>
+                  <p className="text-gray-500">{doctor.specialty}</p>
+                  <p className="text-gray-500">{doctor.location.address}</p>
+                  <p className="text-gray-500">
+                    Current queue: {doctor.currentQueue} patients
+                  </p>
+                  <p className="text-gray-500">
+                    Estimated wait: {doctor.estimatedWaitTime}
+                  </p>
+                </div>
 
-              <div className="flex flex-col -mt-8 justify-between">
-                <select
-                  className={`border border-gray-300 rounded-lg py-2 px-3 ${
-                    doctor.booked && "cursor-not-allowed opacity-50"
-                  }`}
-                  value={selectedTimeSlot}
-                  onChange={(e) => setSelectedTimeSlot(e.target.value)}
-                  disabled={doctor.booked}
-                >
-                  <option value="" disabled>
-                    Select Time Slot
-                  </option>
-                  {doctor.availableTimeSlots.map((slot, index) => (
-                    <option key={index} value={slot}>
-                      {slot}
+                <div className="flex flex-col -mt-8 justify-between">
+                  <select
+                    className={`border border-gray-300 rounded-lg py-2 px-3 ${
+                      doctor.booked && "cursor-not-allowed opacity-50"
+                    }`}
+                    value={selectedTimeSlot}
+                    onChange={(e) => setSelectedTimeSlot(e.target.value)}
+                    disabled={doctor.booked}
+                  >
+                    <option value="" disabled>
+                      Select Time Slot
                     </option>
-                  ))}
-                </select>
-                <button
-                  onClick={() => handleBookAppointment(doctor)}
-                  className={`bg-yellow-500 text-white py-2 px-4 rounded-lg mt-4 ${
-                    doctor.booked && "cursor-not-allowed opacity-50"
-                  }`}
-                  disabled={doctor.booked}
-                >
-                  {doctor.booked ? "Booked" : "Book Appointment"}
-                </button>
+                    {doctor.availableTimeSlots.map((slot, index) => (
+                      <option key={index} value={slot}>
+                        {slot}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => handleBookAppointment(doctor)}
+                    className={`bg-yellow-500 text-white py-2 px-4 rounded-lg mt-4 ${
+                      doctor.booked && "cursor-not-allowed opacity-50"
+                    }`}
+                    disabled={doctor.booked}
+                  >
+                    {doctor.booked ? "Booked" : "Book Appointment"}
+                  </button>
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="bg-white p-6 rounded-lg shadow-md text-center">
+              <h3 className="text-xl font-semibold text-gray-700">
+                No doctors found
+              </h3>
+              <p className="text-gray-500">
+                We couldn’t find any doctors matching your search criteria.
+                Please try again with different filters or check back later.
+              </p>
             </div>
-          ))}
+          )}
         </div>
       </div>
 

@@ -6,6 +6,7 @@ import { Doctor } from "../data";
 const App = () => {
   const [step, setStep] = useState<number>(1);
   const [serachResult, setSearchResult] = useState<Doctor[]>([]);
+  const [copysearchResult, setcopysearchResult] = useState<Doctor[]>([]);
 
   return (
     <div className="">
@@ -13,14 +14,16 @@ const App = () => {
         <FindYourDoctor
           setStep={setStep}
           setSearchResult={setSearchResult}
-          serachResult={serachResult}
+          searchResult={serachResult}
+          setcopysearchResult={setcopysearchResult}
         />
       )}
       {step === 2 && (
         <DoctorList
           setStep={setStep}
-          serachResult={serachResult}
+          searchResult={serachResult}
           setSearchResult={setSearchResult}
+          copysearchResult={copysearchResult}
         />
       )}
     </div>
